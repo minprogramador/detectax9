@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>🎤 Microfone ao vivo com frequência e amplitude</title>
+  <style>
+    body {
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      text-align: center;
+      padding-top: 40px;
+    }
+    h1 { color: #0ff; }
+    canvas { background: #000; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <!-- Liga o microfone, sintonizar com receiver em Freq 281.3 Hz e Amp -35.5dB (proximo do alvo ou aguardar a onda chegar ~~~ escuta NSA com e som autofalante.) -->
+  <h1>🎙️ Microfone ao vivo</h1>
+  <p id="freq">Freq: -- Hz</p>
+  <p id="amp">Amplitude: -- dB</p>
+  <canvas id="viz" width="600" height="200"></canvas>
+
+  <script>
+    async function startAudio() {
+      // 🔊 Pede permissão e captura áudio do microfone
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // 🎧 Cria contexto de áudio
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+
+      // 🔈 Saída de áudio (reproduz o som capturado)
+      const destination = audioCtx.destination;
+      source.connect(destination); // <-- reproduz no alto-falante!
+
+      // 📊 Cria AnalyserNode para medir frequência e amplitude
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+
+      const dataArray = new Float32Array(analyser.fftSize);
+      const freqData = new Uint8Array(analyser.frequencyBinCount);
+
+      const freqLabel = document.getElementById("freq");
+      const ampLabel = document.getElementById("amp");
+      const canvas = document.getElementById("viz");
+      const ctx = canvas.getContext("2d");
+
+      function getDominantFrequency(data, sampleRate) {
+        let maxIndex = 0, maxValue = 0;
+        for (let i = 0; i < data.length; i++) {
+          if (data[i] > maxValue) {
+            maxValue = data[i];
+            maxIndex = i;
+          }
+        }
+        return (maxIndex * sampleRate) / (2 * data.length);
+      }
+
+      function draw() {
+        analyser.getFloatTimeDomainData(dataArray);
+        analyser.getByteFrequencyData(freqData);
+
+        // 🔍 Calcula amplitude RMS (em dB)
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i] * dataArray[i];
+        const rms = Math.sqrt(sum / dataArray.length);
+        const amplitudeDb = 20 * Math.log10(rms + 1e-6);
+
+        // 🎵 Calcula frequência dominante
+        const freq = getDominantFrequency(freqData, audioCtx.sampleRate);
+
+        freqLabel.textContent = `Freq: ${freq.toFixed(1)} Hz`;
+        ampLabel.textContent = `Amplitude: ${amplitudeDb.toFixed(1)} dB`;
+
+        // 📈 Desenha o espectro de áudio
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#0f0";
+        const barWidth = canvas.width / freqData.length;
+        for (let i = 0; i < freqData.length; i++) {
+          const barHeight = freqData[i];
+          ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth, barHeight);
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    startAudio().catch(err => {
+      alert("Erro ao acessar o microfone: " + err.message);
+    });
+  </script>
+</body>
+</html>
+

@@ -3,6 +3,14 @@
 // Requer: rtl_433 no PATH e permissões para acessar o dongle RTL-SDR.
 // Atenção legal: veja observações de legalidade/ética no comentário acima.
 
+//#Para escutar: um receptor SDR (como RTL-SDR, HackRF, Airspy, etc.) com antena adequada.
+
+//#Para transmitir: um transmissor projetado para a frequência desejada (por exemplo, um módulo LoRa, um microtransmissor FM, etc.).
+//#Você pode usá-los em experimentos de transmissão de dados por som (audível ou ultrassônico), mas isso é som via ar, não rádio.
+
+//Para emitir ou receber rádio, você precisa de antena metálica com comprimento proporcional ao comprimento 
+//de onda (por exemplo, para 433 MHz ≈ 17 cm de fio serve como ¼ de onda).
+
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');

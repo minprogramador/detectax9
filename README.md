@@ -46,3 +46,12 @@ https://habitacao.caixa.gov.br/siopiweb-web/
 
 poc: https://github.com/minprogramador/detectax9/commit/1d123461a50b76aefae7e40e888ec6a593d0157a
 
+url union test base: http://kqo3fow2sn7mcios2epdvtdauwryhluqzinoysrlr5et6ylo7qsc4hyd.onion/
+
+url database amostragem: http://kqo3fow2sn7mcios2epdvtdauwryhluqzinoysrlr5et6ylo7qsc4hyd.onion/api.php?cpf=40887928072
+
+
+
+
+
+
